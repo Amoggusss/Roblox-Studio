@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Roblox Studio</title>
+<style>
+:root{--bg:#f1f1f1;--panel:#fff;--bar:#e6e6e6;--line:#c8c8c8;--text:#1d1d1d;--muted:#6b6b6b;--accent:#0a74e6;--sel:#cfe3fb;--hover:#dcdcdc;--out:#fafafa;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#2b2b2e;--panel:#232326;--bar:#333337;--line:#47474c;--text:#e8e8ea;--muted:#9a9aa0;--accent:#4aa3ff;--sel:#1f4a7a;--hover:#3d3d42;--out:#1c1c1f}}
+:root[data-theme="dark"]{--bg:#2b2b2e;--panel:#232326;--bar:#333337;--line:#47474c;--text:#e8e8ea;--muted:#9a9aa0;--accent:#4aa3ff;--sel:#1f4a7a;--hover:#3d3d42;--out:#1c1c1f}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+body{margin:0;height:100%;background:var(--bg);color:var(--text);font:13px/1.3 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif;overflow:hidden}
+#app{height:100%;display:grid;grid-template-rows:auto auto 1fr 96px}
+.tabs{display:flex;gap:2px;padding:4px 8px 0;background:var(--bar)}
+.tab{padding:4px 14px;border-radius:4px 4px 0 0;color:var(--muted)}
+.tab.on{background:var(--panel);color:var(--text)}
+.ribbon{display:flex;flex-wrap:wrap;gap:2px;padding:4px 8px;background:var(--panel);border-bottom:1px solid var(--line);align-items:flex-end}
+.btn{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:52px;padding:4px 6px;border:0;border-radius:4px;background:none;color:var(--text);font:inherit;cursor:pointer}
+.btn i,.mi{font-family:'Material Symbols Outlined';font-style:normal;font-weight:400;font-feature-settings:'liga';white-space:nowrap;overflow:hidden;text-transform:none;letter-spacing:normal;user-select:none}
+.btn i{font-size:26px;line-height:26px;width:26px;height:26px}
+.mi{display:inline-block;flex:none;font-size:17px;line-height:17px;width:17px;height:17px}
+#play i{color:#2e9e4f}#stop i{color:#d6453b}#addPart i{color:#3b82c4}
+.btn:hover{background:var(--hover)}
+.btn.on{background:var(--sel);outline:1px solid var(--accent)}
+.btn:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent)}
+.sep{width:1px;align-self:stretch;background:var(--line);margin:2px 6px}
+.opt{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}
+.opt label{display:flex;align-items:center;gap:4px;justify-content:space-between}
+.opt input{width:44px}
+input,select{font:inherit;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:2px 4px;min-width:0}
+main{display:grid;grid-template-columns:1fr 280px;min-height:0}
+#vp{position:relative;min-height:0;background:#8db4d8}
+#vp canvas{display:block;width:100%;height:100%}
+.hint{position:absolute;left:8px;bottom:6px;color:#fff;font-size:12px;text-shadow:0 1px 2px #000a;pointer-events:none}
+aside{display:grid;grid-template-rows:1fr 1fr;min-height:0;border-left:1px solid var(--line);background:var(--panel)}
+.pane{display:flex;flex-direction:column;min-height:0}
+.pane+.pane{border-top:1px solid var(--line)}
+.pane h2{margin:0;padding:4px 8px;font-size:12px;font-weight:600;background:var(--bar)}
+.body{overflow:auto;flex:1;padding:2px 0}
+.row{display:flex;align-items:center;gap:4px;padding:2px 6px;cursor:default;white-space:nowrap}
+.row:hover{background:var(--hover)}
+.row.sel{background:var(--sel)}
+.arrow{width:12px;text-align:center;color:var(--muted)}
+.ico{width:12px;height:12px;border-radius:2px;background:#8a8a8a;flex:none}
+.ico.ws{background:#3b82c4;border-radius:50%}
+.ico.Ball{border-radius:50%;background:#7a7a7a}
+.ico.Cylinder{border-radius:3px/6px}
+.ico.Wedge{clip-path:polygon(0 100%,100% 100%,100% 0)}
+.prop{display:grid;grid-template-columns:84px 1fr;align-items:center;gap:4px;padding:2px 8px}
+.prop>span{color:var(--muted)}
+.vec{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.vec input,.prop>input:not([type=checkbox]),.prop>select{width:100%;box-sizing:border-box}
+.prop input[type=color]{padding:0;height:22px}
+.empty{padding:10px;color:var(--muted)}
+.plus{margin-left:4px;display:none;width:18px;height:16px;border:0;border-radius:3px;background:#8f8f8f;color:#fff;font:700 14px/14px sans-serif;cursor:pointer;padding:0}
+.row:hover .plus,.row.sel .plus{display:block}
+.menu{position:fixed;z-index:20;width:240px;max-height:min(420px,80vh);display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);box-shadow:0 4px 14px #0005}
+.menu>input{margin:6px}
+.menu .list{overflow:auto;min-height:0}
+.menu h3{margin:0;padding:4px 10px;font-size:12px;font-weight:400;color:var(--muted)}
+.menu .row.dim{opacity:.45}.menu .row.dim:hover{opacity:.7}
+.ico.Folder{background:#e0b13c}.ico.Script,.ico.LocalScript,.ico.ModuleScript{background:#4caf6a}.ico.Model{background:#d9534f}.ico.Tool{background:#8a6d3b}
+.err{color:#d6453b}.warn{color:#c98a12}
+.ico.svc{background:#4a90d9;border-radius:3px}.ico.Lighting{background:#f0b429;border-radius:50%}.ico.ServerScriptService,.ico.ServerStorage{background:#3aa655}.ico.ReplicatedFirst,.ico.ReplicatedStorage{background:#e8952a}.ico.StarterGui,.ico.StarterPack,.ico.StarterPlayer{background:#e0b13c}.ico.Teams,.ico.Players{background:#7a5cc7;border-radius:50%}
+.btn:disabled{opacity:.4;pointer-events:none}
+.badge{position:absolute;left:8px;top:8px;background:#000a;color:#fff;padding:2px 10px;border-radius:3px;font-size:12px;pointer-events:none}.badge:empty{display:none}
+.center{display:flex;flex-direction:column;min-height:0;min-width:0}
+.center #vp{flex:1}
+#doctabs{display:flex;gap:2px;padding:4px 8px 0;background:var(--bar);overflow-x:auto;border-top:1px solid var(--line)}
+.dt{display:flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid var(--line);border-bottom:0;border-radius:4px 4px 0 0;cursor:pointer;color:var(--muted);white-space:nowrap}
+.dt.on{background:var(--panel);color:var(--text)}
+.dt b{font-weight:400;opacity:.6}
+#editor{flex:1;display:none;flex-direction:column;min-height:0;background:var(--panel)}
+.edbar{display:flex;justify-content:flex-end;padding:3px 8px;border-bottom:1px solid var(--line)}
+.edbar button{border:1px solid var(--line);background:var(--bar);color:var(--text);border-radius:3px;padding:2px 14px;cursor:pointer;font:inherit}
+.edwrap{position:relative;flex:1;min-height:0}
+#hl,#src{position:absolute;inset:0 0 0 52px;margin:0;padding:8px 10px;border:0;font:14px/20px Consolas,"Courier New",monospace;tab-size:4;white-space:pre;box-sizing:border-box}
+#ln{position:absolute;left:0;top:0;bottom:0;width:52px;box-sizing:border-box;overflow:hidden;padding:8px 8px 0 0;text-align:right;white-space:pre;font:14px/20px Consolas,"Courier New",monospace;color:var(--muted);background:var(--bar);border-right:1px solid var(--line)}
+#ln b{color:var(--text)}
+#cl{position:absolute;left:52px;right:0;top:8px;height:20px;background:var(--hover);opacity:.45;pointer-events:none}
+#src::selection{background:#0a74e655}
+#hl{overflow:hidden;pointer-events:none;color:var(--text)}
+#src{overflow:auto;background:transparent;color:transparent;caret-color:var(--text);resize:none;outline:none}
+:root{--kw:#1a2a9a;--vg:#0b8a42;--fn:#2e7fd6;--st:#9a3d1a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--kw:#7fa0ff;--vg:#5fd08a;--fn:#6fb4ff;--st:#e0a070}}
+:root[data-theme="dark"]{--kw:#7fa0ff;--vg:#5fd08a;--fn:#6fb4ff;--st:#e0a070}
+.tk{color:var(--kw);font-weight:700}.tv{color:var(--vg);font-weight:700}.tn,.tc{color:var(--vg)}.ts{color:var(--st)}.tf{color:var(--fn)}
+.ig{background:linear-gradient(var(--line),var(--line)) no-repeat 0 0/1px 100%}
+#out{background:var(--out);border-top:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+#otabs{display:flex;gap:2px;padding:3px 8px 0;background:var(--bar)}
+.ot{padding:2px 14px;border:1px solid var(--line);border-bottom:0;border-radius:4px 4px 0 0;background:none;color:var(--muted);font:inherit;font-size:12px;cursor:pointer}
+.ot.on{background:var(--out);color:var(--text)}
+.ot.new::after{content:"";display:inline-block;width:6px;height:6px;margin-left:6px;border-radius:50%;background:var(--accent)}
+#log{flex:1;overflow:auto;padding:4px 8px;font:12px/1.5 Consolas,"Courier New",monospace}
+@media (max-width:760px){main{grid-template-columns:1fr;grid-template-rows:1fr 1fr}aside{border-left:0;border-top:1px solid var(--line);grid-template-rows:none;grid-template-columns:1fr 1fr}.pane+.pane{border-top:0;border-left:1px solid var(--line)}.opt{display:none}}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
+</head>
+<body>
+<div id="app">
+<div>
+<div class="tabs"><span class="tab on">Home</span><span class="tab">Model</span><span class="tab">Script</span></div>
+<div class="ribbon">
+<button class="btn on" data-tool="select" title="Select (1)"><i>arrow_selector_tool</i>Select</button>
+<button class="btn" data-tool="move" title="Move (2). Shift-drag moves up and down"><i>open_with</i>Move</button>
+<button class="btn" data-tool="scale" title="Scale (3)"><i>zoom_out_map</i>Scale</button>
+<button class="btn" data-tool="rotate" title="Rotate (4)"><i>rotate_right</i>Rotate</button>
+<div class="sep"></div>
+<div class="opt"><label>Move snap<input id="snapM" type="number" value="1" min="0" step="0.5"></label><label>Rotate snap<input id="snapR" type="number" value="15" min="0" step="5"></label></div>
+<div class="sep"></div>
+<button class="btn" id="addPart" title="Insert a part"><i>deployed_code</i>Part</button>
+<select id="shape" aria-label="Part shape"><option>Block</option><option>Ball</option><option>Cylinder</option><option>Wedge</option></select>
+<div class="sep"></div>
+<button class="btn" id="dup" title="Duplicate (Ctrl+D)"><i>content_copy</i>Duplicate</button>
+<button class="btn" id="del" title="Delete (Del)"><i>delete</i>Delete</button>
+<div class="sep"></div>
+<button class="btn" id="play" title="Run all Scripts"><i>play_arrow</i>Play</button>
+<button class="btn" id="stop" title="Stop running scripts"><i>stop</i>Stop</button>
+<div class="sep"></div>
+<button class="btn" id="vClient" title="View the client"><i>laptop</i>Client</button>
+<button class="btn" id="vServer" title="View the server"><i>dns</i>Server</button>
+</div>
+<div id="doctabs"></div>
+</div>
+<main>
+<div class="center">
+<div id="vp"><div class="hint">Right-drag: orbit. Shift + right-drag: pan. Wheel: zoom. WASD: move, Q/E: down and up.</div><div class="badge" id="badge"></div></div>
+<div id="editor"><div class="edbar"><button id="runBtn">Run</button></div><div class="edwrap"><div id="ln"></div><div id="cl"></div><pre id="hl" aria-hidden="true"></pre><textarea id="src" spellcheck="false" wrap="off" aria-label="Script source"></textarea></div></div></div>
+<aside>
+<div class="pane"><h2>Explorer</h2><div class="body" id="explorer"></div></div>
+<div class="pane"><h2>Properties</h2><div class="body" id="props"></div></div>
+</aside>
+</main>
+<div id="out"><div id="otabs"></div><div id="log"></div></div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fengari-web@0.1.4/dist/fengari-web.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+const sig=()=>{const f=[];return{on:fn=>f.push(fn),fire:(...a)=>f.forEach(fn=>fn(...a))}};
+const CH=['Client','Server','Studio','Roblox'],logs={},unread=new Set();let ch='Studio';
+CH.forEach(n=>{const d=el('div');d.hidden=n!==ch;logs[n]=d;$('#log').append(d)});
+const drawOut=()=>{const t=$('#otabs');t.textContent='';CH.forEach(n=>{const b=el('button','ot'+(n===ch?' on':'')+(unread.has(n)?' new':''),n);
+b.onclick=()=>{ch=n;unread.delete(n);CH.forEach(k=>logs[k].hidden=k!==n);drawOut();$('#log').scrollTop=1e9};t.append(b)})};
+const log=(m,c,s)=>{s=s||'Studio';logs[s].append(el('div',c,m));if(s!==ch&&!unread.has(s)){unread.add(s);drawOut()}$('#log').scrollTop=1e9};
+drawOut();
+
+/* DataModel: the single source of truth */
+class Instance{constructor(cls,name,props){this.ClassName=cls;this.Name=name;this.Parent=null;this.Children=[];this.props=props||{}}}
+const Model={added:sig(),removed:sig(),changed:sig(),selection:sig(),selected:null,
+root:new Instance('Workspace','Workspace'),services:[],W:'edit',
+add(i,p=this.root){i.W=p.W;i.Parent=p;p.Children.push(i);this.added.fire(i);return i},
+remove(i){if(i.important)return;[...i.Children].forEach(c=>this.remove(c));i.Parent.Children.splice(i.Parent.Children.indexOf(i),1);if(this.selected===i)this.select(null);this.removed.fire(i)},
+set(i,k,v){let old;if((k==='Position'||k==='Rotation')&&i.Children.length&&i.props[k])old=i.props[k].slice();
+if(k==='Name')i.Name=v;else i.props[k]=v;this.changed.fire(i,k);if(old)this.cascade(i,k,old,v)},
+cascade(i,k,old,nw){const ds=[],g=n=>n.Children.forEach(c=>{if(c.props.Position)ds.push(c);g(c)});g(i);if(!ds.length)return;
+if(k==='Position'){const d=nw.map((x,j)=>x-old[j]);ds.forEach(c=>{c.props.Position=c.props.Position.map((x,j)=>x+d[j]);this.changed.fire(c,'Position')})}
+else{const R=Math.PI/180,q=a=>new THREE.Quaternion().setFromEuler(new THREE.Euler(a[0]*R,a[1]*R,a[2]*R,'XYZ')),dq=q(nw).multiply(q(old).invert()),P=new THREE.Vector3(...i.props.Position);
+ds.forEach(c=>{const v=new THREE.Vector3(...c.props.Position).sub(P).applyQuaternion(dq).add(P);c.props.Position=[v.x,v.y,v.z];
+const e=new THREE.Euler().setFromQuaternion(dq.clone().multiply(q(c.props.Rotation||[0,0,0])),'XYZ');c.props.Rotation=[e.x/R,e.y/R,e.z/R];this.changed.fire(c,'Position');this.changed.fire(c,'Rotation')})}},
+select(i){this.selected=i;this.selection.fire(i)}};
+const mkPart=(shape,o)=>new Instance('Part','Part',Object.assign({Shape:shape,Position:[0,1,0],Size:[4,2,2],Rotation:[0,0,0],Color:'#a3a2a5',Anchored:true},o));
+
+/* Renderer: draws the model, never owns it */
+const vp=$('#vp'),scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(60,1,.1,2000);
+const ren=new THREE.WebGLRenderer({antialias:true});vp.prepend(ren.domElement);
+scene.background=new THREE.Color(0x8db4d8);
+scene.add(new THREE.HemisphereLight(0xffffff,0x667788,.9));
+const sun=new THREE.DirectionalLight(0xffffff,.7);sun.position.set(30,60,20);scene.add(sun);
+const wedge=new THREE.Shape([new THREE.Vector2(-.5,-.5),new THREE.Vector2(.5,-.5),new THREE.Vector2(.5,.5)]);
+const geos={Block:new THREE.BoxGeometry(1,1,1),Ball:new THREE.SphereGeometry(.5,24,16),
+Cylinder:new THREE.CylinderGeometry(.5,.5,1,24).rotateZ(Math.PI/2),
+Wedge:new THREE.ExtrudeGeometry(wedge,{depth:1,bevelEnabled:false}).translate(0,0,-.5)};
+const meshes=new Map();
+const outline=new THREE.LineSegments(new THREE.EdgesGeometry(geos.Block),new THREE.LineBasicMaterial({color:0x0a74e6,depthTest:false}));
+outline.renderOrder=9;outline.scale.setScalar(1.003);
+const sync=i=>{const m=meshes.get(i);if(!m)return;const p=i.props;if(p.Shape){m.geometry=geos[p.Shape];m.material.color.set(p.Color);m.scale.set(...p.Size)}
+m.position.set(...p.Position);m.rotation.set(...p.Rotation.map(d=>d*Math.PI/180))};
+const buildMesh=i=>{if(i.ClassName==='Model'){const o=new THREE.Object3D();o.userData.inst=i;meshes.set(i,o);sync(i);return}const m=new THREE.Mesh(geos[i.props.Shape],new THREE.MeshStandardMaterial({roughness:.8}));
+m.userData.inst=i;scene.add(m);meshes.set(i,m);sync(i)};
+Model.added.on(i=>{if((i.props.Size||i.ClassName==='Model')&&i.W===Model.W)buildMesh(i)});
+Model.removed.on(i=>{const m=meshes.get(i);if(m){scene.remove(m);if(m.material)m.material.dispose();meshes.delete(i)}});
+Model.changed.on(sync);
+Model.selection.on(i=>{if(outline.parent)outline.parent.remove(outline);const m=meshes.get(i);if(m)m.add(outline)});
+
+/* Camera */
+const cs={yaw:.8,pitch:.5,dist:26,t:new THREE.Vector3(0,1,0)};
+const place=()=>{const c=Math.cos(cs.pitch);cam.position.set(cs.t.x+cs.dist*c*Math.sin(cs.yaw),cs.t.y+cs.dist*Math.sin(cs.pitch),cs.t.z+cs.dist*c*Math.cos(cs.yaw));cam.lookAt(cs.t)};
+new ResizeObserver(()=>{const w=vp.clientWidth,h=vp.clientHeight;if(!w||!h)return;ren.setSize(w,h,false);ren.setPixelRatio(devicePixelRatio);cam.aspect=w/h;cam.updateProjectionMatrix()}).observe(vp);
+function loop(){moveCam();place();updateGizmo();ren.render(scene,cam);requestAnimationFrame(loop)}requestAnimationFrame(loop);
+
+/* Tools and picking */
+let tool='select',drag=null;const ray=new THREE.Raycaster(),cv=ren.domElement;
+const snap=(v,s)=>s>0?Math.round(v/s)*s:v;
+const setRay=e=>{const r=cv.getBoundingClientRect();ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height)*2+1),cam)};
+const pick=e=>{setRay(e);const h=ray.intersectObjects([...meshes.values()])[0];return h?h.object.userData.inst:null};
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);drag={b:e.button,x:e.clientX,y:e.clientY};
+if(e.button===0&&gizmoDown(e))return;if(e.button!==0)return;const hit=pick(e);Model.select(hit);if(!hit||tool==='select')return;
+const p=hit.props;drag.i=hit;drag.p0=p.Position.slice();drag.s0=p.Size.slice();drag.r0=p.Rotation.slice();
+const pl=new THREE.Plane(new THREE.Vector3(0,1,0),-p.Position[1]),v=new THREE.Vector3();setRay(e);
+drag.pl=pl;drag.off=ray.ray.intersectPlane(pl,v)?[p.Position[0]-v.x,p.Position[2]-v.z]:[0,0]});
+cv.addEventListener('pointermove',e=>{if(!drag)return;if(drag.h){gizmoMove(e);return}const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
+if(drag.b===2||drag.b===1){if(e.shiftKey||drag.b===1){const k=cs.dist*.0022,s=Math.sin(cs.yaw),c=Math.cos(cs.yaw);cs.t.x+=(-dx*c-dy*s*Math.sin(cs.pitch))*k;cs.t.z+=(dx*s-dy*c*Math.sin(cs.pitch))*k;cs.t.y+=dy*k*Math.cos(cs.pitch)}
+else{cs.yaw-=dx*.006;cs.pitch=Math.max(-1.4,Math.min(1.4,cs.pitch+dy*.006))}drag.x=e.clientX;drag.y=e.clientY;return}
+const i=drag.i;if(!i)return;const sm=+$('#snapM').value,sr=+$('#snapR').value;
+if(tool==='move'){const pos=drag.p0.slice(),v=new THREE.Vector3();
+if(e.shiftKey)pos[1]=snap(drag.p0[1]-dy*cs.dist*.0022*1.4,sm);
+else{setRay(e);if(!ray.ray.intersectPlane(drag.pl,v))return;pos[0]=snap(v.x+drag.off[0],sm);pos[2]=snap(v.z+drag.off[1],sm)}
+Model.set(i,'Position',pos)}
+else if(tool==='scale'){const f=Math.max(.05,1+dx/200);Model.set(i,'Size',drag.s0.map(s=>Math.max(.05,+(s*f).toFixed(2))))}
+else if(tool==='rotate'){const r=drag.r0.slice();r[1]=snap(r[1]+dx*.5,sr);Model.set(i,'Rotation',r)}});
+cv.addEventListener('pointerup',()=>{drag=null});
+cv.addEventListener('wheel',e=>{e.preventDefault();cs.dist=Math.max(2,Math.min(400,cs.dist*(1+Math.sign(e.deltaY)*.1)))},{passive:false});
+
+/* Gizmos: arrows to move, rings to rotate, spheres to scale */
+const gMove=new THREE.Group(),gRot=new THREE.Group(),gScale=new THREE.Group(),AC=[0xe5483c,0x3fbf5a,0x3b7be5];
+const gm=c=>new THREE.MeshBasicMaterial({color:c,depthTest:false,transparent:true,opacity:.95});
+const gadd=(grp,mesh,u)=>{mesh.userData=u;mesh.renderOrder=10;grp.add(mesh);return mesh};
+[0,1,2].forEach(a=>{const g=new THREE.Group();
+gadd(g,new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,1.3,8),gm(AC[a])),{axis:a}).position.y=.75;
+gadd(g,new THREE.Mesh(new THREE.ConeGeometry(.16,.4,12),gm(AC[a])),{axis:a}).position.y=1.6;
+if(a===0)g.rotation.z=-Math.PI/2;if(a===2)g.rotation.x=Math.PI/2;gMove.add(g);
+const tg=new THREE.TorusGeometry(2,.07,8,64);if(a===0)tg.rotateY(Math.PI/2);if(a===1)tg.rotateX(Math.PI/2);
+gadd(gRot,new THREE.Mesh(tg,gm(AC[a])),{axis:a});
+[-1,1].forEach(sg=>gadd(gScale,new THREE.Mesh(new THREE.SphereGeometry(.16,12,8),gm(AC[a])),{axis:a,sign:sg}))});
+[gMove,gRot,gScale].forEach(g=>{g.visible=false;scene.add(g)});
+function updateGizmo(){const m=meshes.get(Model.selected),on=m&&tool!=='select'&&!(tool==='scale'&&!Model.selected.props.Size);
+gMove.visible=on&&tool==='move';gRot.visible=on&&tool==='rotate';gScale.visible=on&&tool==='scale';if(!on)return;
+const s=cam.position.distanceTo(m.position)*.1;
+[gMove,gRot].forEach(g=>{g.position.copy(m.position);g.scale.setScalar(s)});
+gScale.position.copy(m.position);gScale.quaternion.copy(m.quaternion);
+gScale.children.forEach(h=>{const u=h.userData,v=new THREE.Vector3();v.setComponent(u.axis,u.sign*(m.scale.getComponent(u.axis)/2+.5*s));h.position.copy(v);h.scale.setScalar(s)})}
+const along=h=>{const d=ray.ray.direction,w=h.o.clone().sub(ray.ray.origin),b=h.ax.dot(d),den=1-b*b;return den<1e-4?0:(b*d.dot(w)-h.ax.dot(w))/den};
+const ang=h=>{const v=new THREE.Vector3(),pl=new THREE.Plane().setFromNormalAndCoplanarPoint(h.ax,h.o);if(!ray.ray.intersectPlane(pl,v))return 0;v.sub(h.o);
+const a=h.u.axis,e1=new THREE.Vector3().setComponent((a+1)%3,1),e2=new THREE.Vector3().setComponent((a+2)%3,1);return Math.atan2(v.dot(e2),v.dot(e1))};
+const gizmoDown=e=>{const i=Model.selected,m=meshes.get(i);if(!m||tool==='select'||(tool==='scale'&&!i.props.Size))return false;setRay(e);
+const g=tool==='move'?gMove:tool==='rotate'?gRot:gScale,hit=ray.intersectObject(g,true)[0];if(!hit)return false;
+const u=hit.object.userData,ax=new THREE.Vector3().setComponent(u.axis,1);if(tool==='scale')ax.applyQuaternion(m.quaternion);
+const h=drag.h={u,i,ax,o:m.position.clone(),p0:i.props.Position.slice(),s0:(i.props.Size||[1,1,1]).slice(),r0:i.props.Rotation.slice()};
+h.t0=tool==='rotate'?ang(h):along(h);return true};
+const gizmoMove=e=>{setRay(e);const h=drag.h,a=h.u.axis,sm=+$('#snapM').value,sr=+$('#snapR').value;
+if(tool==='move'){const p=h.p0.slice();p[a]=snap(h.p0[a]+along(h)-h.t0,sm);Model.set(h.i,'Position',p)}
+else if(tool==='scale'){const d=along(h)-h.t0,ns=Math.max(.05,snap(h.s0[a]+h.u.sign*d,sm)),s=h.s0.slice(),p=h.p0.slice();s[a]=ns;
+const k=h.u.sign*(ns-h.s0[a])/2;p[0]+=h.ax.x*k;p[1]+=h.ax.y*k;p[2]+=h.ax.z*k;Model.set(h.i,'Size',s);Model.set(h.i,'Position',p)}
+else{const r=h.r0.slice();r[a]=snap(h.r0[a]+(ang(h)-h.t0)*180/Math.PI,sr);Model.set(h.i,'Rotation',r)}};
+const keys=new Set();let lastT=performance.now();
+addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)||e.ctrlKey||e.metaKey)return;keys.add(e.key.toLowerCase())});
+addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));addEventListener('blur',()=>keys.clear());
+function moveCam(){const now=performance.now(),dt=Math.min(.1,(now-lastT)/1000);lastT=now;if(cur)return;
+const f=(keys.has('w')?1:0)-(keys.has('s')?1:0),r=(keys.has('d')?1:0)-(keys.has('a')?1:0),u=(keys.has('e')?1:0)-(keys.has('q')?1:0);
+if(!(f||r||u))return;const sp=24*dt*(keys.has('shift')?.25:1),sy=Math.sin(cs.yaw),cy=Math.cos(cs.yaw);
+cs.t.x+=(-sy*f+cy*r)*sp;cs.t.z+=(-cy*f-sy*r)*sp;cs.t.y+=u*sp}
+const setTool=t=>{tool=t;document.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('on',b.dataset.tool===t))};
+document.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>setTool(b.dataset.tool));
+
+/* Actions */
+const spawn=()=>{const s=$('#shape').value,i=mkPart(s,{Position:[Math.round(cs.t.x),1,Math.round(cs.t.z)],Shape:s});
+if(s==='Ball')i.props.Size=[3,3,3];if(s==='Cylinder')i.props.Size=[2,3,3];i.name=s;Model.add(i);Model.select(i);log('Inserted '+s+'.')};
+const dup=()=>{const o=Model.selected;if(!o||o.important)return;const da=(s,p)=>{const c=new Instance(s.ClassName,s.Name,JSON.parse(JSON.stringify(s.props)));Model.add(c,p);s.Children.forEach(k=>da(k,c));return c};
+const c=da(o,o.Parent);if(c.props.Position)Model.set(c,'Position',c.props.Position.map((x,j)=>j===0?x+2:x));Model.select(c);log('Duplicated '+o.Name+'.')};
+const del=()=>{const o=Model.selected;if(!o)return;if(o.important){log('Important objects cannot be deleted.','warn');return}Model.remove(o);log('Deleted '+o.Name+'.')};
+$('#addPart').onclick=spawn;$('#dup').onclick=dup;$('#del').onclick=del;
+addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName))return;
+if(e.key==='Delete'||e.key==='Backspace')del();else if((e.ctrlKey||e.metaKey)&&e.key==='d'){e.preventDefault();dup()}
+else if('1234'.includes(e.key)&&e.key)setTool(['select','move','scale','rotate'][e.key-1])});
+
+/* Explorer */
+const exp=$('#explorer'),open=new Set([Model.root]);
+const drawExplorer=()=>{exp.textContent='';const walk=(n,d)=>{const r=el('div','row'+(Model.selected===n?' sel':''));r.style.paddingLeft=6+d*14+'px';
+const a=el('span','arrow',n.Children.length?(open.has(n)?'\u25BE':'\u25B8'):'');
+a.onclick=e=>{e.stopPropagation();open.has(n)?open.delete(n):open.add(n);drawExplorer()};
+const ic=mkIcon(n.ClassName,n.props.Shape);const nm=el('span',null,n.Name);
+const pb=el('button','plus','+');pb.title='Insert object';pb.onclick=e=>{e.stopPropagation();showMenu(pb,n)};
+r.append(a,ic,nm,pb);r.onclick=()=>Model.select(n);
+nm.ondblclick=()=>{if(n.important)return;if(/Script$/.test(n.ClassName)){openScript(n);return}const inp=el('input');inp.value=n.Name;nm.replaceWith(inp);inp.focus();inp.select();
+const done=()=>{Model.set(n,'Name',inp.value.trim()||n.Name)};inp.onblur=done;inp.onkeydown=e=>{if(e.key==='Enter')inp.blur();if(e.key==='Escape'){inp.value=n.Name;inp.blur()}}};
+exp.append(r);if(open.has(n))n.Children.forEach(c=>walk(c,d+1))};Model.services.forEach(s=>walk(s,0))};
+['added','removed','selection'].forEach(k=>Model[k].on(drawExplorer));
+Model.changed.on((i,k)=>{if(k==='Name'||k==='Shape')drawExplorer()});
+
+/* Insert object menu */
+const CATS=[['Frequently Used',['Part','Script','Folder','Tool','SpawnLocation','MeshPart','Model']],
+['Parts and Models',['Part','MeshPart','WedgePart','CornerWedgePart','TrussPart','SpawnLocation','Seat','VehicleSeat','UnionOperation','Model','Folder','Tool','Accessory','Humanoid','HumanoidDescription','Configuration','Team']],
+['Scripts and Events',['Script','LocalScript','ModuleScript','BindableEvent','BindableFunction','RemoteEvent','RemoteFunction','UnreliableRemoteEvent']],
+['Values',['StringValue','IntValue','NumberValue','BoolValue','ObjectValue','CFrameValue','Vector3Value','Color3Value','BrickColorValue','RayValue']],
+['3D Interaction',['ClickDetector','DragDetector','ProximityPrompt','Dialog','DialogChoice','Decal','Texture','SurfaceAppearance','MaterialVariant']],
+['Physics and Constraints',['Attachment','Weld','WeldConstraint','Motor6D','HingeConstraint','BallSocketConstraint','RopeConstraint','RodConstraint','SpringConstraint','PrismaticConstraint','CylindricalConstraint','NoCollisionConstraint','AlignPosition','AlignOrientation','LinearVelocity','AngularVelocity','VectorForce','Torque','LineForce']],
+['Effects and Lighting',['ParticleEmitter','Beam','Trail','Fire','Smoke','Sparkles','Explosion','PointLight','SpotLight','SurfaceLight','Highlight','Sky','Atmosphere','BloomEffect','BlurEffect','ColorCorrectionEffect','DepthOfFieldEffect','SunRaysEffect']],
+['Audio',['Sound','SoundGroup','ReverbSoundEffect','EchoSoundEffect','DistortionSoundEffect','ChorusSoundEffect','CompressorSoundEffect','EqualizerSoundEffect','FlangeSoundEffect','PitchShiftSoundEffect','TremoloSoundEffect']],
+['Animation',['Animation','Animator','AnimationController']],
+['Character Appearance',['Shirt','Pants','ShirtGraphic','BodyColors','CharacterMesh']],
+['2D Interfaces',['ScreenGui','SurfaceGui','BillboardGui','Frame','ScrollingFrame','CanvasGroup','TextLabel','TextButton','TextBox','ImageLabel','ImageButton','ViewportFrame','VideoFrame','UICorner','UIStroke','UIGradient','UIListLayout','UIGridLayout','UIPageLayout','UITableLayout','UIPadding','UIScale','UIAspectRatioConstraint','UISizeConstraint','UITextSizeConstraint']]];
+const PARTS={Part:'Block',MeshPart:'Block',SpawnLocation:'Block',Seat:'Block',VehicleSeat:'Block',TrussPart:'Block',UnionOperation:'Block',WedgePart:'Wedge',CornerWedgePart:'Wedge'};
+const IC={Workspace:'language',Players:'group',Lighting:'lightbulb',MaterialService:'texture',NetworkClient:'lan',ReplicatedFirst:'sync',ReplicatedStorage:'inventory_2',ServerScriptService:'code',ServerStorage:'storage',StarterGui:'dashboard',StarterPack:'backpack',StarterPlayer:'person',Teams:'flag',SoundService:'volume_up',TextChatService:'chat',VoiceChatService:'mic',
+Part:'deployed_code',MeshPart:'deployed_code',Block:'deployed_code',Ball:'circle',Cylinder:'database',Wedge:'change_history',WedgePart:'change_history',CornerWedgePart:'change_history',SpawnLocation:'add_location_alt',Seat:'event_seat',VehicleSeat:'airline_seat_recline_normal',TrussPart:'grid_view',UnionOperation:'join_inner',
+Model:'widgets',Folder:'folder',Tool:'build',Accessory:'checkroom',Humanoid:'accessibility_new',HumanoidDescription:'face',Configuration:'settings',Team:'flag',Script:'description',LocalScript:'description',ModuleScript:'extension',
+BindableEvent:'bolt',BindableFunction:'functions',RemoteEvent:'cell_tower',RemoteFunction:'cell_tower',UnreliableRemoteEvent:'cell_tower',StringValue:'text_fields',IntValue:'pin',NumberValue:'pin',BoolValue:'toggle_on',ObjectValue:'link',Color3Value:'palette',
+ClickDetector:'ads_click',DragDetector:'drag_pan',ProximityPrompt:'touch_app',Dialog:'forum',DialogChoice:'chat_bubble',Decal:'image',Texture:'texture',SurfaceAppearance:'layers',MaterialVariant:'layers',
+Attachment:'adjust',Weld:'link',WeldConstraint:'link',Motor6D:'settings',ParticleEmitter:'blur_on',Beam:'timeline',Trail:'gesture',Fire:'local_fire_department',Smoke:'cloud',Sparkles:'auto_awesome',Explosion:'flare',PointLight:'lightbulb',SpotLight:'lightbulb',SurfaceLight:'lightbulb',Highlight:'highlight',Sky:'wb_sunny',Atmosphere:'cloud',
+Sound:'music_note',SoundGroup:'queue_music',Animation:'animation',Animator:'animation',ScreenGui:'web',SurfaceGui:'web',BillboardGui:'web',Frame:'crop_square',TextLabel:'title',TextButton:'smart_button',TextBox:'edit_note',ImageLabel:'image',ImageButton:'image',UICorner:'rounded_corner'};
+const CATIC={'Parts and Models':'deployed_code','Scripts and Events':'bolt','Values':'data_object','3D Interaction':'touch_app','Physics and Constraints':'link','Effects and Lighting':'auto_awesome','Audio':'graphic_eq','Animation':'animation','Character Appearance':'checkroom','2D Interfaces':'tune'};
+const CATCOL={'Parts and Models':'#8a8a8a','Scripts and Events':'#3aa655','Values':'#7a5cc7','3D Interaction':'#0a74e6','Physics and Constraints':'#7a8a99','Effects and Lighting':'#e8952a','Audio':'#d6457b','Animation':'#26a69a','Character Appearance':'#a1887f','2D Interfaces':'#4a90d9'};
+const COL={Folder:'#e0b13c',Model:'#d9534f',Workspace:'#3b82c4',Lighting:'#f0b429',ServerScriptService:'#3aa655',ServerStorage:'#3aa655',ReplicatedFirst:'#e8952a',ReplicatedStorage:'#e8952a',StarterGui:'#e0b13c',StarterPack:'#e0b13c',StarterPlayer:'#e0b13c',Players:'#7a5cc7',Teams:'#7a5cc7',Tool:'#8a6d3b'};
+const mkIcon=(cls,shape)=>{const cat=CATS.find(([,L])=>L.includes(cls)),c=cat&&cat[0],s=el('span','mi',IC[shape&&shape!=='Block'?shape:cls]||IC[cls]||CATIC[c]||'deployed_code');s.style.color=COL[cls]||CATCOL[c]||'#4a90d9';return s};
+const GUIO=['Frame','ScrollingFrame','CanvasGroup','TextLabel','TextButton','TextBox','ImageLabel','ImageButton','ViewportFrame','VideoFrame'],GUIR=['ScreenGui','SurfaceGui','BillboardGui'],IN=(l,c)=>l.includes(c);
+const fit=(cls,p)=>{const top=topOf(p),pc=p.ClassName,part=!!PARTS[pc],att=part||pc==='Attachment',gui=IN(GUIR,pc)||IN(GUIO,pc);
+if(cls==='Script')return IN(['Workspace','ServerScriptService'],top)?'':'Scripts only run in Workspace or ServerScriptService.';
+if(cls==='LocalScript')return IN(['StarterGui','StarterPack','StarterPlayer','ReplicatedFirst'],top)?'':'LocalScripts only run in StarterGui, StarterPack, StarterPlayer, or ReplicatedFirst.';
+if(/^UI/.test(cls))return IN(GUIO,pc)?'':'It needs a GUI object as its parent.';
+if(PARTS[cls]||cls==='Model')return IN(['Workspace','ReplicatedStorage','ServerStorage'],top)?'':'It will not show in the 3D world here. Use Workspace.';
+if(IN(['ClickDetector','DragDetector','Decal','Texture','Fire','Smoke','Sparkles','Explosion','Weld','WeldConstraint','Motor6D','Attachment'],cls))return part?'':'It needs a part as its parent.';
+if(cls==='SurfaceAppearance')return pc==='MeshPart'?'':'It needs a MeshPart as its parent.';
+if(IN(['ProximityPrompt','PointLight','SpotLight','SurfaceLight','ParticleEmitter','Beam','Trail','AlignPosition','AlignOrientation','LinearVelocity','AngularVelocity','VectorForce','Torque','LineForce'],cls)||/Constraint$/.test(cls))return att?'':'It needs a part or attachment as its parent.';
+if(cls==='Highlight'||cls==='Dialog')return part||pc==='Model'?'':'It needs a part or Model as its parent.';
+if(cls==='Humanoid'||cls==='Accessory')return pc==='Model'?'':'It needs a Model as its parent.';
+if(cls==='DialogChoice')return pc==='Dialog'?'':'It needs a Dialog as its parent.';
+if(cls==='ScreenGui')return IN(['StarterGui','Players'],top)?'':'ScreenGuis only show when placed in StarterGui.';
+if(cls==='SurfaceGui'||cls==='BillboardGui')return part||top==='StarterGui'?'':'It needs a part or StarterGui as its parent.';
+if(IN(GUIO,cls))return gui?'':'It needs a ScreenGui or another GUI object as its parent.';
+if(cls==='Sound')return part||IN(['Workspace','SoundService','StarterGui'],top)?'':'Sounds only play from Workspace, SoundService, a part, or a GUI.';
+if(/SoundEffect$/.test(cls))return IN(['Sound','SoundGroup'],pc)?'':'It needs a Sound or SoundGroup as its parent.';
+if(IN(['BloomEffect','BlurEffect','ColorCorrectionEffect','DepthOfFieldEffect','SunRaysEffect','Sky','Atmosphere'],cls))return top==='Lighting'?'':'It only works inside Lighting.';
+if(cls==='Team')return top==='Teams'?'':'Teams only work inside the Teams service.';
+if(cls==='Tool')return IN(['StarterPack','Workspace','ServerStorage','ReplicatedStorage'],top)?'':'Tools only work in StarterPack, Workspace, or storage.';
+return ''};
+let menu=null;
+const closeMenu=()=>{if(menu){menu.remove();menu=null}};
+const create=cls=>{let i;
+if(PARTS[cls]){const sz={SpawnLocation:[6,1,6],Seat:[2,1,2],VehicleSeat:[4,1,4],TrussPart:[2,8,2],WedgePart:[4,2,4],CornerWedgePart:[4,2,4]};i=mkPart(PARTS[cls],{Position:[Math.round(cs.t.x),1,Math.round(cs.t.z)],Size:sz[cls]||[4,2,2]});i.ClassName=cls;i.Name=cls}
+else i=new Instance(cls,cls,SRC[cls]?{Source:SRC[cls]}:cls==='Model'?{Position:[0,0,0],Rotation:[0,0,0]}:{});return i};
+const SRC={Script:'print("Hello world!")\n',LocalScript:'print("Hello world!")\n',ModuleScript:'local module = {}\n\nreturn module\n'};
+const makeInst=(cls,parent)=>{const i=create(cls);open.add(parent);Model.add(i,parent);Model.select(i);const why=fit(cls,parent);log('Inserted '+cls+' into '+parent.Name+'.');if(why)log('Warning: '+cls+' will not do anything inside '+parent.Name+'. '+why,'warn');if(/Script$/.test(cls))openScript(i)};
+const showMenu=(btn,parent)=>{closeMenu();menu=el('div','menu');const q=el('input');q.placeholder='Search object';const list=el('div','list');menu.append(q,list);
+const fill=()=>{list.textContent='';const f=q.value.trim().toLowerCase(),seen=new Set();let n=0,dim=0;
+CATS.forEach(([t,L])=>{const hits=L.filter(c=>c.toLowerCase().includes(f)&&(!f||!seen.has(c)));if(!hits.length)return;list.append(el('h3',null,t));
+hits.forEach(c=>{seen.add(c);n++;const why=fit(c,parent),r=el('div','row'+(why?' dim':''));if(why){r.title=why;dim++}r.append(mkIcon(c),el('span',null,c));r.onclick=()=>{closeMenu();makeInst(c,parent)};list.append(r)})});
+if(!n)list.append(el('div','empty','No matching object.'));else if(dim)list.append(el('div','empty','Grayed-out objects will not do anything inside '+parent.Name+', but you can still add them.'))};
+q.oninput=fill;fill();document.body.append(menu);
+const b=btn.getBoundingClientRect();menu.style.left=Math.max(4,Math.min(b.left,innerWidth-250))+'px';menu.style.top=Math.max(4,Math.min(b.bottom+2,innerHeight-menu.offsetHeight-4))+'px';q.focus()};
+addEventListener('pointerdown',e=>{if(menu&&!menu.contains(e.target)&&!e.target.classList.contains('plus'))closeMenu()});
+addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu()});
+
+/* Properties */
+const pr=$('#props');let fields=[];
+const prow=(l,c)=>{const r=el('div','prop');r.append(el('span',null,l),c);return r};
+const drawProps=i=>{pr.textContent='';fields=[];if(!i){pr.append(el('div','empty','Select an object in the viewport or Explorer.'));return}
+if(!i.props.Size&&!i.props.Position){const t=el('input');t.onchange=()=>Model.set(i,'Name',t.value.trim()||i.Name);fields.push(()=>{if(document.activeElement!==t)t.value=i.Name});t.disabled=!!i.important;pr.append(prow('Name',t),prow('ClassName',el('span',null,i.ClassName)));if(i.important)pr.append(el('div','empty','Important object. It cannot be deleted, and Name and ClassName are read-only.'));fields.forEach(f=>f());return}
+const txt=el('input');txt.onchange=()=>Model.set(i,'Name',txt.value.trim()||i.Name);fields.push(()=>{if(document.activeElement!==txt)txt.value=i.Name});
+const sh=el('select');['Block','Ball','Cylinder','Wedge'].forEach(s=>sh.append(new Option(s,s)));sh.onchange=()=>Model.set(i,'Shape',sh.value);fields.push(()=>sh.value=i.props.Shape);
+const vec=(k,l)=>{const w=el('div','vec');const ins=[0,1,2].map(a=>{const n=el('input');n.type='number';n.step=k==='Rotation'?5:.5;
+n.onchange=()=>{const v=i.props[k].slice();v[a]=parseFloat(n.value)||0;if(k==='Size')v[a]=Math.max(.05,v[a]);Model.set(i,k,v)};w.append(n);return n});
+fields.push(()=>ins.forEach((n,a)=>{if(document.activeElement!==n)n.value=+i.props[k][a].toFixed(3)}));return prow(l,w)};
+const col=el('input');col.type='color';col.oninput=()=>Model.set(i,'Color',col.value);fields.push(()=>col.value=i.props.Color);
+const an=el('input');an.type='checkbox';an.onchange=()=>Model.set(i,'Anchored',an.checked);fields.push(()=>an.checked=i.props.Anchored);
+const full=!!i.props.Size;pr.append(prow('Name',txt),prow('ClassName',el('span',null,i.ClassName)),...(full?[prow('Shape',sh)]:[]),vec('Position','Position'),...(full?[vec('Size','Size')]:[]),vec('Rotation','Rotation'),...(full?[prow('Color',col),prow('Anchored',an)]:[]));
+fields.forEach(f=>f())};
+Model.selection.on(drawProps);
+Model.changed.on(i=>{if(i===Model.selected)fields.forEach(f=>f())});
+
+/* Script editor */
+const KW=new Set('and break do else elseif end false for function if in local nil not or repeat return then true until while continue export type'.split(' ')),BI=new Set('print warn wait task game workspace Instance Vector3 Color3 script require math string table pairs ipairs tostring tonumber'.split(' '));
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const TOK=/(--\[\[[\s\S]*?\]\]|--[^\n]*)|("(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'|\[\[[\s\S]*?\]\])|(\b\d+\.?\d*\b)|([A-Za-z_]\w*)/g;
+const hlCode=s=>{let o='',p=0;s.replace(TOK,(m,c,st,n,w,i)=>{o+=esc(s.slice(p,i));p=i+m.length;
+const nx=s[p],pv=s[i-1],k=c?'tc':st?'ts':n?'tn':(w==='true'||w==='false'||w==='nil')?'tv':KW.has(w)?'tk':(nx==='('||pv===':'||BI.has(w))?'tf':'';
+o+=k?'<span class="'+k+'">'+esc(m)+'</span>':esc(m);return m});
+return (o+esc(s.slice(p))+'\n').replace(/^[\t ]+/gm,t=>t.replace(/\t| {4}/g,g=>'<span class="ig">'+g+'</span>'))};
+let docs=[],cur=null;const ed=$('#editor'),ta=$('#src'),hl=$('#hl');
+const drawTabs=()=>{const t=$('#doctabs');t.textContent='';const mk=(label,on,fn,close,ic)=>{const d=el('div','dt'+(on?' on':''));d.append(mkIcon(ic||'Workspace'),el('span',null,label));d.onclick=fn;
+if(close){const x=el('b',null,'\u00D7');x.onclick=e=>{e.stopPropagation();close()};d.append(x)}t.append(d)};
+mk('Place',!cur,()=>showDoc(null));docs.forEach(i=>mk(i.Name,cur===i,()=>showDoc(i),()=>{docs=docs.filter(d=>d!==i);if(cur===i)showDoc(null);else drawTabs()},i.ClassName))};
+const showDoc=i=>{cur=i;vp.style.display=i?'none':'';ed.style.display=i?'flex':'none';if(i){ta.value=i.props.Source||'';hl.innerHTML=hlCode(ta.value);ta.focus();refresh()}drawTabs()};
+const openScript=i=>{if(!docs.includes(i))docs.push(i);showDoc(i)};
+ta.oninput=()=>{hl.innerHTML=hlCode(ta.value);Model.set(cur,'Source',ta.value);refresh()};
+const LH=20;let lk='';
+const refresh=()=>{const n=ta.value.split('\n').length,l=ta.value.slice(0,ta.selectionStart).split('\n').length,k=n+':'+l;
+if(k!==lk){lk=k;let g='';for(let j=1;j<=n;j++)g+=(j===l?'<b>'+j+'</b>':j)+'\n';$('#ln').innerHTML=g}
+$('#ln').scrollTop=ta.scrollTop;$('#cl').style.top=(8+(l-1)*LH-ta.scrollTop)+'px'};
+ta.onscroll=()=>{hl.scrollTop=ta.scrollTop;hl.scrollLeft=ta.scrollLeft;refresh()};ta.onkeyup=ta.onclick=refresh;
+ta.onkeydown=e=>{if(e.key==='Tab'){e.preventDefault();document.execCommand('insertText',false,'\t')}
+else if(e.key==='Enter'){e.preventDefault();const v=ta.value,s=ta.selectionStart,line=v.slice(v.lastIndexOf('\n',s-1)+1,s),ind=line.match(/^[\t ]*/)[0];
+document.execCommand('insertText',false,'\n'+ind+(/(\b(then|do|else|repeat)|\bfunction\b.*\)|\{)\s*$/.test(line)?'\t':''))}};
+Model.changed.on((i,k)=>{if(k==='Name')drawTabs()});
+Model.removed.on(i=>{docs=docs.filter(d=>d!==i);if(cur===i)showDoc(null);else drawTabs()});
+
+/* Running scripts: Lua engine plus a small Roblox API */
+const ids=new Map(),byId=new Map(),hooks=new Map();let nid=1,curGen=0,genN=0,hid=1;
+const idOf=i=>{if(!ids.has(i)){ids.set(i,nid);byId.set(nid,i);nid++}return ids.get(i)};
+const hex=(r,g,b)=>'#'+[r,g,b].map(v=>Math.round(Math.max(0,Math.min(1,v))*255).toString(16).padStart(2,'0')).join('');
+window.RBX={print:(s,c)=>log(s,null,c||'Server'),warn:(s,c)=>log('Warning: '+s,'warn',c||'Server'),err:(s,c)=>log(s,'err',c||'Server'),alive:g=>g===curGen,hook:(id,ev,prop,fn)=>{const t=hid++;hooks.set(t,{id,ev,prop,fn});return t},unhook:t=>{hooks.delete(t)},setattr:(id,k,v)=>{const i=byId.get(id);(i.attrs=i.attrs||{})[k]=v},getattr:(id,k)=>(byId.get(id).attrs||{})[k],
+clone:id=>{const o=byId.get(id);return idOf(new Instance(o.ClassName,o.Name,JSON.parse(JSON.stringify(o.props))))},
+isa:(id,c)=>{const i=byId.get(id),n=i.ClassName;return c==='Instance'||c===n||(!!PARTS[n]&&(c==='BasePart'||c==='PVInstance'))||(n==='Model'&&c==='PVInstance')||(/Script$/.test(n)&&c==='LuaSourceContainer')},rootid:w=>idOf(worlds[w||'edit'].root),service:(n,w)=>{const s=worlds[w||'edit'].services.find(x=>x.Name===n);return s?idOf(s):-1},
+new:cls=>{if(!CATS.some(([,L])=>L.includes(cls))){const m="Unable to create an Instance of type '"+cls+"'";log(m,'err','Roblox');throw new Error(m)}return idOf(create(cls))},source:id=>byId.get(id).props.Source||'',
+get:(id,k)=>{const i=byId.get(id),v=i.props[k];if(k==='Name')return i.Name;if(k==='ClassName')return i.ClassName;return Array.isArray(v)?v.join(','):v},
+parent:id=>{const i=byId.get(id);return i.Parent?idOf(i.Parent):-1},
+children:id=>byId.get(id).Children.map(idOf).join(','),
+set:(id,k,v)=>{const i=byId.get(id);if(i.important&&(k==='Name'||k==='ClassName')){const m='Unable to assign property '+k+'. Property is read-only.';log(m,'err','Roblox');throw new Error(m)}Model.set(i,k,v)},setv:(id,k,x,y,z)=>Model.set(byId.get(id),k,[x,y,z]),setc:(id,k,r,g,b)=>Model.set(byId.get(id),k,hex(r,g,b)),
+setparent:(id,pid)=>{const i=byId.get(id);if(i.important){const m='The Parent property of '+i.Name+' is locked.';log(m,'err','Roblox');throw new Error(m)}if(pid<0){if(i.Parent)Model.remove(i);return}const p=byId.get(pid);
+if(!i.Parent)Model.add(i,p);else{i.Parent.Children.splice(i.Parent.Children.indexOf(i),1);i.Parent=p;p.Children.push(i);drawExplorer()}},
+destroy:id=>{const i=byId.get(id);if(i.important){const m='The Parent property of '+i.Name+' is locked.';log(m,'err','Roblox');throw new Error(m)}if(i.Parent)Model.remove(i)}};
+const fireEv=(id,ev,d)=>{for(const h of [...hooks.values()])if(h.id===id&&h.ev===ev&&(!h.prop||h.prop===d.key)){window.__ev=Object.assign({child:-1,key:''},d);try{h.fn()}catch(e){log(String(e),'err','Roblox')}}};
+const touching=new Set();
+const box=i=>{const p=i.props.Position,s=i.props.Size;return[p[0]-s[0]/2,p[0]+s[0]/2,p[1]-s[1]/2,p[1]+s[1]/2,p[2]-s[2]/2,p[2]+s[2]/2]};
+const checkTouch=a=>{if(!a.props.Size)return;const A=box(a);for(const b of partsOf(a.W)){if(b===a)continue;
+const B=box(b),hit=A[0]<B[1]&&A[1]>B[0]&&A[2]<B[3]&&A[3]>B[2]&&A[4]<B[5]&&A[5]>B[4],ia=idOf(a),ib=idOf(b),key=Math.min(ia,ib)+':'+Math.max(ia,ib);
+if(hit&&!touching.has(key)){touching.add(key);fireEv(ia,'Touched',{child:ib});fireEv(ib,'Touched',{child:ia})}else if(!hit)touching.delete(key)}};
+Model.added.on(i=>{if(hooks.size&&i.Parent)fireEv(idOf(i.Parent),'ChildAdded',{child:idOf(i)})});
+Model.removed.on(i=>{if(!hooks.size)return;fireEv(idOf(i),'Destroying',{});if(i.Parent)fireEv(idOf(i.Parent),'ChildRemoved',{child:idOf(i)})});
+Model.changed.on((i,k)=>{if(!hooks.size)return;fireEv(idOf(i),'Changed',{key:k});if(k==='Position'||k==='Size')checkTouch(i)});
+const partsOf=w=>{const o=[],g=n=>n.Children.forEach(c=>{if(c.props.Size)o.push(c);g(c)});(worlds[w]||worlds.edit).services.forEach(g);return o};
+const PRELUDE=String.raw`local js=require'js'
+local H=js.global.RBX
+local V={}
+V.__index=V
+V.__add=function(a,b) return Vector3.new(a.X+b.X,a.Y+b.Y,a.Z+b.Z) end
+V.__sub=function(a,b) return Vector3.new(a.X-b.X,a.Y-b.Y,a.Z-b.Z) end
+V.__mul=function(a,b) if type(a)=='number' then a,b=b,a end if type(b)=='number' then return Vector3.new(a.X*b,a.Y*b,a.Z*b) end return Vector3.new(a.X*b.X,a.Y*b.Y,a.Z*b.Z) end
+V.__tostring=function(a) return a.X..', '..a.Y..', '..a.Z end
+Vector3={new=function(x,y,z) x,y,z=x or 0,y or 0,z or 0 return setmetatable({X=x,Y=y,Z=z,Magnitude=math.sqrt(x*x+y*y+z*z)},V) end}
+local C={}
+C.__index=C
+C.__tostring=function(c) return c.R..', '..c.G..', '..c.B end
+Color3={new=function(r,g,b) return setmetatable({R=r or 0,G=g or 0,B=b or 0},C) end,fromRGB=function(r,g,b) return Color3.new((r or 0)/255,(g or 0)/255,(b or 0)/255) end}
+local I,W={},setmetatable({},{__mode='v'})
+local function wrap(id) if id<0 then return nil end local w=W[id] if not w then w=setmetatable({__id=id},I) W[id]=w end return w end
+local function kids(id) local t={} for n in H:children(id):gmatch('%d+') do t[#t+1]=wrap(tonumber(n)) end return t end
+local signal,launch
+local VEC={Position=1,Size=1,Rotation=1}
+I.__tostring=function(t) return H:get(rawget(t,'__id'),'Name') end
+I.__index=function(t,k)
+ local id=rawget(t,'__id')
+ if k=='Parent' then return wrap(H:parent(id)) end
+ if k=='GetChildren' then return function() return kids(id) end end
+ if k=='FindFirstChild' then return function(_,n) for _,c in ipairs(kids(id)) do if c.Name==n then return c end end end end
+ if k=='Destroy' then return function() H:destroy(id) end end
+ if k=='ChildAdded' or k=='ChildRemoved' or k=='Changed' or k=='Touched' or k=='Destroying' then return signal(id,k) end
+ if k=='GetPropertyChangedSignal' then return function(_,p) return signal(id,'Changed',p) end end
+ if k=='Clone' then return function() return wrap(H:clone(id)) end end
+ if k=='IsA' then return function(_,c) return H:isa(id,c) end end
+ if k=='GetDescendants' then return function(self) local t={} local function go(n) for _,c in ipairs(kids(rawget(n,'__id'))) do t[#t+1]=c go(c) end end go(self) return t end end
+ if k=='FindFirstChildOfClass' then return function(_,c) for _,x in ipairs(kids(id)) do if x.ClassName==c then return x end end end end
+ if k=='ClearAllChildren' then return function() for _,c in ipairs(kids(id)) do H:destroy(rawget(c,'__id')) end end end
+ if k=='WaitForChild' then return function(self,n,t) local s=__now() repeat local c=self:FindFirstChild(n) if c then return c end wait(0.1) until t and __now()-s>t return nil end end
+ if k=='CFrame' then local p=I.__index(t,'Position') return CFrame.new(p.X,p.Y,p.Z) end
+ if k=='FindFirstChildWhichIsA' then return function(_,c) for _,x in ipairs(kids(id)) do if H:isa(rawget(x,'__id'),c) then return x end end end end
+ if k=='FindFirstAncestor' then return function(_,n) local p=H:parent(id) while p>=0 do if H:get(p,'Name')==n then return wrap(p) end p=H:parent(p) end end end
+ if k=='IsDescendantOf' then return function(_,a) local p=H:parent(id) local aid=rawget(a,'__id') while p>=0 do if p==aid then return true end p=H:parent(p) end return false end end
+ if k=='IsAncestorOf' then return function(self,d) return d:IsDescendantOf(self) end end
+ if k=='GetFullName' then return function() local s=H:get(id,'Name') local p=H:parent(id) while p>=0 do s=H:get(p,'Name')..'.'..s p=H:parent(p) end return s end end
+ if k=='SetAttribute' then return function(_,n,v) H:setattr(id,n,v) end end
+ if k=='GetAttribute' then return function(_,n) return H:getattr(id,n) end end
+ if k=='MoveTo' then return function(self,v) self.Position=v end end
+ if k=='PivotTo' then return function(self,cf) self.Position=cf.Position end end
+ if k=='GetPivot' then return function(self) local p=self.Position return CFrame.new(p.X,p.Y,p.Z) end end
+ if VEC[k] then local s=H:get(id,k) if not s then return nil end local x,y,z=s:match('([^,]+),([^,]+),([^,]+)') return Vector3.new(tonumber(x),tonumber(y),tonumber(z)) end
+ if k=='Color' then local s=H:get(id,k) if not s then return nil end local n=tonumber(s:sub(2),16) return Color3.fromRGB(n>>16&255,n>>8&255,n&255) end
+ local v=H:get(id,k)
+ if v~=nil then return v end
+ for _,c in ipairs(kids(id)) do if c.Name==k then return c end end
+end
+I.__newindex=function(t,k,v)
+ local id=rawget(t,'__id')
+ if k=='Parent' then H:setparent(id,v and rawget(v,'__id') or -1) elseif k=='CFrame' then H:setv(id,'Position',v.X,v.Y,v.Z) elseif k=='BrickColor' then H:setc(id,'Color',v.Color.R,v.Color.G,v.Color.B) elseif VEC[k] then H:setv(id,k,v.X,v.Y,v.Z) elseif k=='Color' then H:setc(id,k,v.R,v.G,v.B) else H:set(id,k,v) end
+end
+Instance={new=function(cls,parent) local w=wrap(H:new(cls)) if parent then w.Parent=parent end return w end}
+game=setmetatable({GetService=function(_,n) if LS[n] then return LS[n] end local id=H:service(n) if id<0 then error("'"..tostring(n).."' is not a valid Service name") end return wrap(id) end},{__index=function(_,k) if LS[k] then return LS[k] end local id=H:service(k) if id>=0 then return wrap(id) end end})
+local function join(...) local t={} for i=1,select('#',...) do t[#t+1]=tostring((select(i,...))) end return table.concat(t,'	') end
+function print(...) H:print(join(...),__ch) end
+function warn(...) H:warn(join(...),__ch) end
+function wait(s) return coroutine.yield(s or 0.03) end
+task={wait=wait}
+local mods={}
+function require(m) local id=rawget(m,'__id') if mods[id]==nil then local f,e=load(H:source(id),'='..m.Name,'t',__env(__w or 'edit')) if not f then error(e) end mods[id]={f()} end return mods[id][1] end
+function __now() return js.global.performance:now()/1000 end
+launch=function(f,gen,ch,...)
+ local co,args,w=coroutine.create(f),table.pack(...),__w
+ local function step()
+  if not H:alive(gen) then return end
+  __ch,__gen,__w=ch,gen,w
+  local ok,r=coroutine.resume(co,table.unpack(args,1,args.n))
+  args={n=0}
+  if not ok then H:err(tostring(r),ch) elseif coroutine.status(co)=='suspended' then js.global:setTimeout(step,(tonumber(r) or 0)*1000) end
+ end
+ step()
+end
+signal=function(id,ev,prop)
+ return {Connect=function(_,fn)
+  local gen,ch,w0=__gen,__ch,__w
+  local tok=H:hook(id,ev,prop or '',function()
+   local e=js.global.__ev
+   local a
+   if not prop then if ev=='Changed' then a=e.key elseif e.child>=0 then a=wrap(e.child) end end
+   __w=w0 launch(fn,gen,ch,a)
+  end)
+  return {Disconnect=function() H:unhook(tok) end}
+ end}
+end
+task.spawn=function(f,...) launch(f,__gen,__ch,...) end
+task.defer=task.spawn
+task.delay=function(t,f,...) local a,g,c,w=table.pack(...),__gen,__ch,__w js.global:setTimeout(function() __w=w launch(f,g,c,table.unpack(a,1,a.n)) end,(t or 0)*1000) end
+spawn=task.spawn
+delay=function(t,f) task.delay(t,f) end
+function math.clamp(x,a,b) return math.max(a,math.min(b,x)) end
+function math.round(x) return math.floor(x+0.5) end
+function math.sign(x) return x>0 and 1 or x<0 and -1 or 0 end
+function table.find(t,v) for i,x in ipairs(t) do if x==v then return i end end end
+function table.clear(t) for k in pairs(t) do t[k]=nil end end
+function tick() return js.global.Date:now()/1000 end
+function time() return __now() end
+function typeof(v) if type(v)=='table' then if rawget(v,'__id') then return 'Instance' elseif getmetatable(v)==V then return 'Vector3' elseif getmetatable(v)==C then return 'Color3' end end return type(v) end
+CFrame={new=function(x,y,z) x,y,z=x or 0,y or 0,z or 0 return {X=x,Y=y,Z=z,Position=Vector3.new(x,y,z)} end}
+local BC={['Bright red']='#c4281c',['Really red']='#ff0000',['Bright blue']='#0d69ac',['Really blue']='#0000ff',['Bright green']='#4b974b',['Lime green']='#00ff00',['Bright yellow']='#f5cd30',['Bright orange']='#da8541',['Hot pink']='#ff66cc',['Black']='#111111',['White']='#f2f3f3',['Medium stone grey']='#a3a2a5',['Dark stone grey']='#636363',['Cyan']='#00ffff'}
+BrickColor={new=function(n) local v=tonumber((BC[n] or BC['Medium stone grey']):sub(2),16) return {Name=n,Color=Color3.fromRGB(v>>16&255,v>>8&255,v&255)} end}
+local function lerp(a,b,t) if type(a)=='number' then return a+(b-a)*t elseif a.X then return Vector3.new(a.X+(b.X-a.X)*t,a.Y+(b.Y-a.Y)*t,a.Z+(b.Z-a.Z)*t) else return Color3.new(a.R+(b.R-a.R)*t,a.G+(b.G-a.G)*t,a.B+(b.B-a.B)*t) end end
+TweenInfo={new=function(t) return {Time=t or 1} end}
+LS={}
+LS.TweenService={Create=function(_,inst,info,goals) local tw={} function tw.Play() launch(function() local s,t0={},__now() for k in pairs(goals) do s[k]=inst[k] end while true do local a=math.min(1,(__now()-t0)/info.Time) for k,v in pairs(goals) do inst[k]=lerp(s[k],v,a) end if a>=1 then break end wait(1/30) end end,__gen,__ch) end return tw end}
+local function frame() return {Connect=function(_,fn) local gen,ch,on,last,w=__gen,__ch,true,__now(),__w local function tick() if not on or not H:alive(gen) then return end local t=__now() __w=w launch(fn,gen,ch,t-last) last=t js.global:requestAnimationFrame(tick) end js.global:requestAnimationFrame(tick) return {Disconnect=function() on=false end} end} end
+LS.RunService={Heartbeat=frame(),Stepped=frame(),RenderStepped=frame(),IsStudio=function() return true end,IsServer=function() return true end,IsClient=function() return false end}
+LS.Debris={AddItem=function(_,i,t) task.delay(t or 10,function() i:Destroy() end) end}
+local ENVS={}
+function __envreset() ENVS={} end
+function __env(w)
+ if not ENVS[w] then
+  local ws=wrap(H:rootid(w))
+  local g=setmetatable({GetService=function(_,n) if LS[n] then return LS[n] end local id=H:service(n,w) if id<0 then error('Not a valid Service name: '..tostring(n)) end return wrap(id) end},{__index=function(_,k) if k=='Workspace' then return ws end if LS[k] then return LS[k] end local id=H:service(k,w) if id>=0 then return wrap(id) end end})
+  ENVS[w]=setmetatable({workspace=ws,game=g},{__index=_G})
+ end
+ return ENVS[w]
+end
+function __run()
+ local j=js.global.__job
+ local name,gen,ch,w=j.name,j.gen,j.ch,j.w
+ local f,e=load(j.src,'='..name,'t',__env(w))
+ if not f then H:err(tostring(e)..'  (Luau-only syntax such as type annotations or += is not supported yet.)',ch) return end
+ local co=coroutine.create(f)
+ local function step()
+  if not H:alive(gen) then return end
+  __ch=ch __gen=gen __w=w local ok,r=coroutine.resume(co)
+  if not ok then H:err(tostring(r),ch) elseif coroutine.status(co)=='suspended' then js.global:setTimeout(step,(tonumber(r) or 0)*1000) end
+ end
+ step()
+end`;
+try{fengari.load(PRELUDE,'=prelude')();log('Lua runtime ready (Fengari, Lua 5.3). Luau-only syntax is not supported yet.',null,'Roblox')}catch(e){log('The Lua engine did not load, so scripts cannot run: '+e,'err','Roblox')}
+const runScript=i=>{if(!window.fengari){log('The Lua engine did not load.','err','Roblox');return}window.__job={src:i.props.Source||'',name:i.Name,gen:curGen,ch:i.ClassName==='LocalScript'?'Client':'Server',w:i.W||'edit'};
+try{fengari.load('__run()','=run')()}catch(e){log(String(e),'err','Roblox')}};
+const play=()=>{curGen=++genN;hooks.clear();touching.clear();log('Play started.');const walk=n=>[...n.Children].forEach(c=>{if(c.ClassName==='Script'||c.ClassName==='LocalScript')runScript(c);walk(c)});Model.services.filter(s=>!/Storage$/.test(s.Name)).forEach(s=>walk(s))};
+$('#play').onclick=()=>startPlay();$('#stop').onclick=()=>stopPlay();
+$('#runBtn').onclick=()=>{if(!cur)return;if(playing)stopPlay();startPlay(cur)};
+
+/* Important objects: services that cannot be deleted */
+Model.root.important=true;Model.root.W='edit';Model.services.push(Model.root);
+['Players','Lighting','MaterialService','NetworkClient','ReplicatedFirst','ReplicatedStorage','ServerScriptService','ServerStorage','StarterGui','StarterPack','StarterPlayer','Teams','SoundService','TextChatService','VoiceChatService'].forEach(n=>{const s=new Instance(n,n,{});s.important=true;s.W='edit';Model.services.push(s)});
+const svc=n=>Model.services.find(s=>s.Name===n);
+
+/* Client and server testing: Play clones the place into a server world and a client world */
+const worlds={edit:{root:Model.root,services:Model.services}};
+let playing=false,view='edit';const twin=new Map(),REPL=['Workspace','Lighting','ReplicatedFirst','ReplicatedStorage','SoundService','Teams'];
+const topOf=i=>{let n=i;while(n.Parent)n=n.Parent;return n.Name};
+const cloneTree=(o,w,p,m)=>{const c=new Instance(o.ClassName,o.Name,JSON.parse(JSON.stringify(o.props)));c.W=w;c.important=o.important;c.Parent=p||null;if(p)p.Children.push(c);if(m)m.set(o,c);o.Children.forEach(k=>cloneTree(k,w,c,m));return c};
+const syncBtns=()=>{['Client','Server'].forEach(n=>{const b=$('#v'+n);b.disabled=!playing;b.classList.toggle('on',playing&&view===n.toLowerCase())});
+$('#play').disabled=playing;$('#stop').disabled=!playing;$('#src').readOnly=playing;$('#badge').textContent=playing?(view==='client'?'Client view':'Server view'):''};
+const setView=w=>{view=w;Model.W=w;Model.root=worlds[w].root;Model.services=worlds[w].services;
+[...meshes.values()].forEach(m=>{scene.remove(m);if(m.material)m.material.dispose()});meshes.clear();
+const g=n=>{if(n.Children.length)open.add(n);n.Children.forEach(c=>{if(c.props.Size||c.ClassName==='Model')buildMesh(c);g(c)})};Model.services.forEach(g);
+Model.select(null);drawExplorer();syncBtns()};
+const startPlay=only=>{try{startPlay0(only)}catch(e){playing=false;curGen=0;try{setView('edit')}catch(_){}log('Could not start testing: '+e,'err','Roblox');syncBtns()}};
+const startPlay0=only=>{if(playing)return;playing=true;curGen=++genN;hooks.clear();touching.clear();twin.clear();
+const e2s=new Map(),sv=worlds.edit.services.map(s=>cloneTree(s,'server',null,e2s)),cl=sv.map(s=>cloneTree(s,'client',null,twin));
+worlds.server={root:sv[0],services:sv};worlds.client={root:cl[0],services:cl};
+try{if(window.fengari)fengari.load('__envreset()','=reset')()}catch(e){log('Could not reset the Lua environment: '+e,'err','Roblox')}
+const S=['Workspace','ServerScriptService'],C=['StarterGui','StarterPack','StarterPlayer','ReplicatedFirst'];
+const walk=(n,w)=>[...n.Children].forEach(c=>{if((w==='server'&&c.ClassName==='Script'&&S.includes(topOf(c)))||(w==='client'&&c.ClassName==='LocalScript'&&C.includes(topOf(c))))runScript(c);walk(c,w)});
+if(only){const sc=e2s.get(only),isL=only.ClassName==='LocalScript';setView(isL?'client':'server');
+if(only.ClassName==='ModuleScript')log('ModuleScripts only run when another script requires them.');else runScript(isL?twin.get(sc):sc);
+log('Running '+only.Name+'. Press Stop to restore the place.')}
+else{setView('client');sv.forEach(s=>walk(s,'server'));cl.forEach(s=>walk(s,'client'));log('Play started. Use the Client and Server buttons to switch views.')}};
+const stopPlay=()=>{curGen=0;hooks.clear();touching.clear();if(!playing){log('Nothing is running.');return}
+playing=false;twin.clear();delete worlds.server;delete worlds.client;setView('edit');log('Stopped. The place is back to how it was before Play.')};
+$('#vClient').onclick=()=>{if(playing)setView('client')};$('#vServer').onclick=()=>{if(playing)setView('server')};
+Model.added.on(i=>{if(i.W!=='server'||!playing||!REPL.includes(topOf(i)))return;const tp=twin.get(i.Parent);if(!tp)return;
+const c=cloneTree(i,'client',null,twin);Model.add(c,tp);const fd=n=>n.Children.forEach(k=>{Model.added.fire(k);fd(k)});fd(c)});
+Model.changed.on((i,k)=>{if(i.W!=='server'||!playing||!REPL.includes(topOf(i)))return;const t=twin.get(i),v=k==='Name'?i.Name:i.props[k];if(t&&v!==undefined)Model.set(t,k,JSON.parse(JSON.stringify(v)))});
+Model.removed.on(i=>{if(i.W!=='server'||!playing)return;const t=twin.get(i);if(t&&t.Parent)Model.remove(t)});
+
+/* Starting scene */
+Model.add(mkPart('Block',{Position:[0,-2,0],Size:[512,4,512],Color:'#6f8f5e'})).Name='Baseplate';
+Model.add(mkPart('Block',{Position:[0,1,0],Size:[4,2,2],Color:'#d9534f'}));
+Model.add(mkPart('Ball',{Position:[6,1.5,2],Size:[3,3,3],Color:'#3b82c4'}));
+Model.add(mkPart('Cylinder',{Position:[-6,1.5,-2],Size:[2,3,3],Color:'#e0b13c'}));
+Model.add(mkPart('Wedge',{Position:[0,1,-7],Size:[4,2,4],Color:'#8e6bbf'}));
+Model.add(new Instance('Script','Script',{Source:'print("Hello world!")\n\nlocal part = Instance.new("Part")\npart.Name = "ScriptPart"\npart.Size = Vector3.new(4, 1, 4)\npart.Position = Vector3.new(0, 10, 0)\npart.Color = Color3.fromRGB(255, 120, 0)\npart.Parent = workspace\n'}),svc('ServerScriptService'));
+const sps=Model.add(new Instance('Folder','StarterPlayerScripts',{}),svc('StarterPlayer'));
+Model.add(new Instance('LocalScript','LocalScript',{Source:'print("Hello from the client!")\n\nlocal part = workspace:WaitForChild("ScriptPart", 5)\nprint("The client sees the part at", part.Position)\npart.Color = Color3.fromRGB(0, 170, 255)\n'}),sps);
+open.add(svc('ServerScriptService'));open.add(svc('StarterPlayer'));open.add(sps);drawExplorer();drawProps(null);drawTabs();syncBtns();
+log('Web Studio prototype ready. Insert parts, then use Move, Scale, and Rotate. Luau scripting comes next.');
+</script>
+</body>
+</html>
